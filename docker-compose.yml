@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  mariadb:
+    image: bitnami/mariadb:latest
+    restart: unless-stopped
+    networks:
+      - ${PROJECT_NAME}-network
+    volumes:
+      - /docker/volumes/${PROJECT_NAME}_mariadb:/bitnami/mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_PASS}
+      MARIADB_DATABASE: ${PROJECT_NAME}
+      MARIADB_USER: ${PROJECT_NAME}
+      MARIADB_PASSWORD: ${DB_PASS}
+  drupal:
+    depends_on:
+      - mariadb
+    image: bitnami/drupal-nginx:8-debian-10
+    restart: unless-stopped
+    networks:
+      - ${PROJECT_NAME}-network
+    volumes:
+      - /docker/volumes/${PROJECT_NAME}_drupal:/bitnami/drupal
+    environment:
+      DRUPAL_DATABASE_HOST: mariadb
+      DRUPAL_DATABASE_NAME: ${PROJECT_NAME}
+      DRUPAL_DATABASE_USER: ${PROJECT_NAME}
+      DRUPAL_DATABASE_PASSWORD: ${DB_PASS}
+    ports:
+      - 8080:8080
+      - 8443:8443
+networks:
+  ${PROJECT_NAME}-network:
